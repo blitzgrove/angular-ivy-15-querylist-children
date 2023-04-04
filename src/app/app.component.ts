@@ -94,12 +94,14 @@ export class AppComponent {
     .fill(0)
     .map((i, index) => index + 1);
 
-  ngAfterViewInit(): void {
+  ngAfterViewChecked(): void {
     this.childComponents.changes
       .pipe(
         switchMap((children: QueryList<ChildComponent>) =>
           combineLatest(
-            children.map((child: ChildComponent) => child.instance$)
+            children.map((child: ChildComponent) =>
+              child.instance$.pipe(take(1))
+            )
           )
         ),
         takeUntil(this.close)
@@ -110,6 +112,8 @@ export class AppComponent {
           this.instances = instances;
         },
       });
+
+    this.childComponents.notifyOnChanges();
 
     /*
     combineLatest(
